@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  # Your Flask API
+  api:
+    build: .                  # Use the Dockerfile in the current directory
+    container_name: flask-api
+    ports:
+      - '5000:5000'
+    environment:
+      - FLASK_ENV=development
+    # Only use volumes if you want code changes to sync without rebuilding
+    volumes:
+      - .:/my-project         # Matches WORKDIR in your Dockerfile
+    networks:
+      - app-network
+
+  # Your Frontend (Nginx)
+  frontend:
+    image: nginx:alpine
+    container_name: frontend-server
+    ports:
+      - '8080:80'
+    # This will serve any index.html you have in a folder named 'frontend'
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    networks:
+      - app-network
+    depends_on:
+      - api
+
+networks:
+  app-network:
+    driver: bridge
